@@ -1,6 +1,13 @@
 # steam-login
 
-Steam-only OpenID authentication provider, for simplicity. Think of it as a mini-Passport, but only for Steam. You will need some sort of session middleware.
+Steam-only OpenID authentication provider, for simplicity. Think of it as a mini-[Passport](http://passportjs.org/), but only for Steam.
+
+## Installation
+You can install this library via npm:
+```
+npm install steam-login
+```
+You will need some sort of session library, like [express-session](https://github.com/expressjs/session).
 
 ## Example Usage
 
