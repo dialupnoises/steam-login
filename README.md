@@ -1,6 +1,6 @@
 # steam-login
 
-Steam-only OpenID authentication provider, for simplicity. Think of it as a mini-Passport, but only for Steam. 
+Steam-only OpenID authentication provider, for simplicity. Think of it as a mini-Passport, but only for Steam. You will need some sort of session middleware.
 
 ## Example Usage
 
