@@ -3,7 +3,7 @@ var express = require('express'),
     Promise = require('bluebird/js/main/promise')(),
     request = require('request-promise');
 
-var relyingParty, apiKey;
+var relyingParty, apiKey, useSession = true;
 
 module.exports.middleware = function(opts)
 {
@@ -16,11 +16,14 @@ module.exports.middleware = function(opts)
 	);
 
 	apiKey = opts.apiKey;
+	useSession = opts.useSession || true;
 
 	return function(req, res, next) {
-		req.user = req.session.steamUser;
-		if(req.user)
+		if(req.session && req.session.steamUser)
+		{
+			req.user = req.session.steamUser;
 			req.logout = logout(req);
+		}
 
 		next();
 	};
@@ -44,9 +47,13 @@ module.exports.verify = function()
 			if(!result || !result.authenticated)
 				next('Failed to authenticate user.');
 			fetchIdentifier(result.claimedIdentifier)
-				.then(function(user) {
-					req.session.steamUser = req.user = user;
-					req.logout = logout(req);
+				.then(function(user) {\
+					req.user = user;
+					if(useSession)
+					{
+						req.session.steamUser = req.user;
+						req.logout = logout(req);
+					}
 					next();
 				})
 				.catch(function(err)
