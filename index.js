@@ -47,7 +47,7 @@ module.exports.verify = function()
 			if(!result || !result.authenticated)
 				next('Failed to authenticate user.');
 			fetchIdentifier(result.claimedIdentifier)
-				.then(function(user) {\
+				.then(function(user) {
 					req.user = user;
 					if(useSession)
 					{
