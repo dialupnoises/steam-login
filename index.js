@@ -43,9 +43,9 @@ module.exports.verify = function()
 	return function(req, res, next) {
 		relyingParty.verifyAssertion(req, function(err, result) {
 			if(err)
-				next(err);
+				return next(err);
 			if(!result || !result.authenticated)
-				next('Failed to authenticate user.');
+				return next('Failed to authenticate user.');
 			fetchIdentifier(result.claimedIdentifier)
 				.then(function(user) {
 					req.user = user;
