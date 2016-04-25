@@ -16,7 +16,11 @@ module.exports.middleware = function(opts)
 	);
 
 	apiKey = opts.apiKey;
-	useSession = opts.useSession || true;
+	useSession = true;
+	if(opts.useSession !== undefined)
+	{
+		useSession = opts.useSession;
+	}
 
 	return function(req, res, next) {
 		if(req.session && req.session.steamUser)
