@@ -2,7 +2,7 @@
   "name": "steam-login",
   "description": "Simple Connect / Express Steam authentication library.",
   "author": "Andrew Rogers <anrogers529@gmail.com>",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "keywords": [
   	"authentication",
   	"login",
