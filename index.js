@@ -47,9 +47,11 @@ module.exports.verify = function()
 	return function(req, res, next) {
 		relyingParty.verifyAssertion(req, function(err, result) {
 			if(err)
-				return next(err);
+				return next(err.message);
 			if(!result || !result.authenticated)
 				return next('Failed to authenticate user.');
+			if(!/^https?:\/\/steamcommunity\.com\/openid\/id\/\d+$/.test(result.claimedIdentifier))
+				return next('Claimed identity is not valid.');
 			fetchIdentifier(result.claimedIdentifier)
 				.then(function(user) {
 					req.user = user;
