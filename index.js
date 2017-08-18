@@ -98,6 +98,7 @@ function fetchIdentifier(steamID)
 				throw new Error('No players found for the given steam ID.');
 			var player = players[0];
 			return Promise.resolve({
+				_json: player,
 				steamid: steamID,
 				username: player.personaname,
 				name: player.realname,
