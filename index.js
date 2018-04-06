@@ -74,7 +74,7 @@ module.exports.verify = function()
 module.exports.authenticate = function()
 {
 	return function(req, res, next) {
-		relyingParty.authenticate('http://steamcommunity.com/openid', false, function(err, authURL) {
+		relyingParty.authenticate('https://steamcommunity.com/openid', false, function(err, authURL) {
 			if(err) 
 			{
 				console.log(err);
@@ -90,8 +90,8 @@ module.exports.authenticate = function()
 function fetchIdentifier(steamID)
 {
 	// our url is http://steamcommunity.com/openid/id/<steamid>
-	steamID = steamID.replace('http://steamcommunity.com/openid/id/', '');
-	return request('http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key='+apiKey+'&steamids=' + steamID)
+	steamID = steamID.replace('https://steamcommunity.com/openid/id/', '');
+	return request('https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key='+apiKey+'&steamids=' + steamID)
 		.then(function(res) {
 			var players = JSON.parse(res).response.players;
 			if(players.length == 0)
