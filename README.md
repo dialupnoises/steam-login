@@ -1,3 +1,7 @@
+# A note about the status of this library
+
+Between school, work, and life, I don't have the time right now to maintain this library. If you're working on something that needs steam login support for the time being, I suggest you take a look at [passport-steam](https://www.npmjs.com/package/passport-steam). It's a little more complex (I wrote this library as a simpler alternative to passport-steam), but it has a more mature codebase and active maintainers. If anyone wants to take over this project, either temporarily or permanently, see [issue #20 - project needs maintainer](https://github.com/cpancake/steam-login/issues/20).
+
 # steam-login
 
 Steam-only OpenID authentication provider, for simplicity. Think of it as a mini-[Passport](http://passportjs.org/), but only for Steam.
