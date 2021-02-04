@@ -1,12 +1,9 @@
-var express = require('express'),
-    openid  = require('openid'),
-    Promise = require('bluebird/js/main/promise')(),
-    request = require('request-promise');
+const openid  = require('openid');
+const axios = require('axios');
 
 var relyingParty, apiKey, useSession = true;
 
-module.exports.middleware = function(opts)
-{
+function middleware(opts) {
 	relyingParty = new openid.RelyingParty(
 		opts.verify,
 		opts.realm,
@@ -17,14 +14,12 @@ module.exports.middleware = function(opts)
 
 	apiKey = opts.apiKey;
 	useSession = true;
-	if(opts.useSession !== undefined)
-	{
+	if(opts.useSession !== undefined) {
 		useSession = opts.useSession;
 	}
 
 	return function(req, res, next) {
-		if(req.session && req.session.steamUser)
-		{
+		if(req.session && req.session.steamUser) {
 			req.user = req.session.steamUser;
 			req.logout = logout(req);
 		}
@@ -33,8 +28,7 @@ module.exports.middleware = function(opts)
 	};
 }
 
-module.exports.enforceLogin = function(redirect)
-{
+function enforceLogin(redirect) {
 	return function(req, res, next) {
 		if(!req.user)
 			return res.redirect(redirect);
@@ -42,43 +36,38 @@ module.exports.enforceLogin = function(redirect)
 	};
 }
 
-module.exports.verify = function()
-{
+function verify() {
 	return function(req, res, next) {
 		relyingParty.verifyAssertion(req, function(err, result) {
-			if(err)
+			if(err) 
 				return next(err.message);
-			if(!result || !result.authenticated)
+			if(!result || !result.authenticated) 
 				return next('Failed to authenticate user.');
 			if(!/^https?:\/\/steamcommunity\.com\/openid\/id\/\d+$/.test(result.claimedIdentifier))
 				return next('Claimed identity is not valid.');
 			fetchIdentifier(result.claimedIdentifier)
 				.then(function(user) {
 					req.user = user;
-					if(useSession)
-					{
+					if(useSession) {
 						req.session.steamUser = req.user;
 						req.logout = logout(req);
 					}
 					next();
 				})
-				.catch(function(err)
-				{
+				.catch(function(err) {
 					next(err);
 				});
-			
 		});
 	};
 }
 
-module.exports.authenticate = function()
-{
+function authenticate() {
 	return function(req, res, next) {
 		relyingParty.authenticate('https://steamcommunity.com/openid', false, function(err, authURL) {
-			if(err) 
-			{
+			if(err) {
 				console.log(err);
 				return next('Authentication failed: ' + err);
+
 			}
 			if(!authURL)
 				return next('Authentication failed.');
@@ -87,18 +76,18 @@ module.exports.authenticate = function()
 	};
 }
 
-function fetchIdentifier(steamID)
-{
+function fetchIdentifier(openid) {
 	// our url is http://steamcommunity.com/openid/id/<steamid>
-	steamID = steamID.replace('https://steamcommunity.com/openid/id/', '');
-	return request('https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key='+apiKey+'&steamids=' + steamID)
-		.then(function(res) {
-			var players = JSON.parse(res).response.players;
+	steamID = openid.replace('https://steamcommunity.com/openid/id/', '');
+	return axios.get(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${apiKey}&steamids=${steamID}`)
+		.then(({data}) => {
+			let players = data.response.players;
 			if(players.length == 0)
 				throw new Error('No players found for the given steam ID.');
-			var player = players[0];
-			return Promise.resolve({
+			let player = players[0];
+			return ({
 				_json: player,
+				openid,
 				steamid: steamID,
 				username: player.personaname,
 				name: player.realname,
@@ -112,10 +101,11 @@ function fetchIdentifier(steamID)
 		});
 }
 
-function logout(req)
-{
+function logout(req) {
 	return function() {
 		delete req.session.steamUser;
 		req.user = null;
 	}
 }
+
+module.exports = { authenticate, verify, enforceLogin, middleware };

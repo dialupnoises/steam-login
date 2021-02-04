@@ -4,21 +4,20 @@
   "author": "Andrew Rogers <anrogers529@gmail.com>",
   "version": "0.1.7",
   "keywords": [
-  	"authentication",
-  	"login",
-  	"steam",
-  	"user"
+    "authentication",
+    "login",
+    "steam",
+    "user"
   ],
   "repository": "cpancake/steam-login",
   "license": "MIT",
   "homepage": "http://github.com/cpancake/steam-login",
   "dependencies": {
-    "openid": "^2.0.6",
-    "express": "^4.12.2",
-    "bluebird": "^2.9.13",
-    "request-promise": "^0.4.0"
+    "axios": "^0.18.0",
+    "openid": "^2.0.6"
   },
   "devDependencies": {
+    "express": "^4.12.2",
     "express-session": "^1.10.3"
   }
 }
