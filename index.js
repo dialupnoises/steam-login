@@ -1,9 +1,9 @@
-const openid  = require('openid');
+const openid = require('openid');
 const axios = require('axios');
 
-var relyingParty, apiKey, useSession = true;
+let relyingParty, apiKey, useSession;
 
-function middleware(opts) {
+const middleware = opts => {
 	relyingParty = new openid.RelyingParty(
 		opts.verify,
 		opts.realm,
@@ -13,12 +13,10 @@ function middleware(opts) {
 	);
 
 	apiKey = opts.apiKey;
-	useSession = true;
-	if(opts.useSession !== undefined) {
-		useSession = opts.useSession;
-	}
+	
+	useSession = (opts.useSession == undefined || opts.useSession == true) ? true : false;
 
-	return function(req, res, next) {
+	return (req, res, next) => {
 		if(req.session && req.session.steamUser) {
 			req.user = req.session.steamUser;
 			req.logout = logout(req);
@@ -28,17 +26,17 @@ function middleware(opts) {
 	};
 }
 
-function enforceLogin(redirect) {
-	return function(req, res, next) {
+const enforceLogin = redirect => {
+	return (req, res, next) => {
 		if(!req.user)
 			return res.redirect(redirect);
 		next();
 	};
 }
 
-function verify() {
-	return function(req, res, next) {
-		relyingParty.verifyAssertion(req, function(err, result) {
+const verify = () => {
+	return (req, res, next) => {
+		relyingParty.verifyAssertion(req, (err, result) => {
 			if(err) 
 				return next(err.message);
 			if(!result || !result.authenticated) 
@@ -46,7 +44,7 @@ function verify() {
 			if(!/^https?:\/\/steamcommunity\.com\/openid\/id\/\d+$/.test(result.claimedIdentifier))
 				return next('Claimed identity is not valid.');
 			fetchIdentifier(result.claimedIdentifier)
-				.then(function(user) {
+				.then(user => {
 					req.user = user;
 					if(useSession) {
 						req.session.steamUser = req.user;
@@ -54,21 +52,19 @@ function verify() {
 					}
 					next();
 				})
-				.catch(function(err) {
-					next(err);
-				});
+				.catch(err => next(err));
 		});
 	};
 }
 
-function authenticate() {
-	return function(req, res, next) {
-		relyingParty.authenticate('https://steamcommunity.com/openid', false, function(err, authURL) {
+const authenticate = () => {
+	return (req, res, next) => {
+		relyingParty.authenticate('https://steamcommunity.com/openid', false, (err, authURL) => {
 			if(err) {
 				console.log(err);
 				return next('Authentication failed: ' + err);
-
 			}
+
 			if(!authURL)
 				return next('Authentication failed.');
 			res.redirect(authURL);
@@ -76,7 +72,7 @@ function authenticate() {
 	};
 }
 
-function fetchIdentifier(openid) {
+const fetchIdentifier = openid => {
 	// our url is http://steamcommunity.com/openid/id/<steamid>
 	steamID = openid.replace('https://steamcommunity.com/openid/id/', '');
 	return axios.get(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${apiKey}&steamids=${steamID}`)
@@ -101,8 +97,8 @@ function fetchIdentifier(openid) {
 		});
 }
 
-function logout(req) {
-	return function() {
+const logout = req => {
+	return () => {
 		delete req.session.steamUser;
 		req.user = null;
 	}
