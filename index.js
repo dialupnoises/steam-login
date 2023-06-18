@@ -3,6 +3,14 @@ const axios = require('axios');
 
 var relyingParty, apiKey, useSession = true;
 
+const OPENID_CHECK = {
+  ns: 'http://specs.openid.net/auth/2.0',
+  op_endpoint: 'https://steamcommunity.com/openid/login',
+  claimed_id: 'https://steamcommunity.com/openid/id/',
+  identity: 'https://steamcommunity.com/openid/id/',
+};
+
+
 function middleware(opts) {
 	relyingParty = new openid.RelyingParty(
 		opts.verify,
@@ -38,7 +46,13 @@ function enforceLogin(redirect) {
 
 function verify() {
 	return function(req, res, next) {
+		if (query['openid.ns'] !== OPENID_CHECK.ns)	return next('Claimed identity is not valid.');
+		if (query['openid.op_endpoint'] !== OPENID_CHECK.op_endpoint)	return next('Claimed identity is not valid.');
+		if (!query['openid.claimed_id']?.startsWith(OPENID_CHECK.claimed_id))	return next('Claimed identity is not valid.');
+		if (!query['openid.identity']?.startsWith(OPENID_CHECK.identity))	return next('Claimed identity is not valid.');
+		
 		relyingParty.verifyAssertion(req, function(err, result) {
+			
 			if(err) 
 				return next(err.message);
 			if(!result || !result.authenticated) 
