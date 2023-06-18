@@ -46,11 +46,12 @@ function enforceLogin(redirect) {
 
 function verify() {
 	return function(req, res, next) {
+		const { query } = req;
 		if (query['openid.ns'] !== OPENID_CHECK.ns)	return next('Claimed identity is not valid.');
 		if (query['openid.op_endpoint'] !== OPENID_CHECK.op_endpoint)	return next('Claimed identity is not valid.');
 		if (!query['openid.claimed_id']?.startsWith(OPENID_CHECK.claimed_id))	return next('Claimed identity is not valid.');
 		if (!query['openid.identity']?.startsWith(OPENID_CHECK.identity))	return next('Claimed identity is not valid.');
-		
+
 		relyingParty.verifyAssertion(req, function(err, result) {
 			
 			if(err) 
